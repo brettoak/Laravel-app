@@ -3,19 +3,22 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "keywords": [
+        "laravel",
+        "framework"
+    ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "bezhansalleh/filament-shield": "^4.0",
         "filament/filament": "~4.0",
-        "laragear/webauthn": "^4.0",
-        "laravel/framework": "^12.0",
+        "laragear/webauthn": "^5.0",
+        "laravel/framework": "^13.0",
         "laravel/jetstream": "^5.3",
         "laravel/reverb": "^1.6",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.24",
-        "laravel/tinker": "^2.9",
+        "laravel/tinker": "^3.0",
         "livewire/livewire": "^3.6.4",
         "predis/predis": "^3.3"
     },
@@ -26,7 +29,7 @@
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
-        "phpunit/phpunit": "^11.0.1"
+        "phpunit/phpunit": "^12.0"
     },
     "autoload": {
         "psr-4": {
@@ -80,7 +83,6 @@
                 "PKSA-365x-2zjk-pt47",
                 "PKSA-yb9k-ykqx-p2zw",
                 "PKSA-8x19-j2j3-bn67"
-
             ]
         }
     },
