@@ -2,13 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ReverbSingleJob;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
@@ -36,6 +37,18 @@ class AdminPanelProvider extends PanelProvider
             ->navigationItems([
 
 
+            ])
+            ->navigationGroups([
+                NavigationGroup::make('Dashboard')
+                    ->icon('heroicon-o-home'),
+                NavigationGroup::make('Content')
+                    ->icon('heroicon-o-document-text'),
+                NavigationGroup::make('Operations')
+                    ->icon('heroicon-o-command-line'),
+                NavigationGroup::make('System')
+                    ->icon('heroicon-o-cog-6-tooth'),
+                NavigationGroup::make('Permission Management')
+                    ->icon('heroicon-o-shield-check'),
             ])
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName("Brett Han")

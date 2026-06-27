@@ -4,7 +4,7 @@
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../resources/views/livewire/**/*';
 
-/* 定义自定义深色颜色变量 */
+/* Define custom dark color variables */
 :root {
     --color-dark-primary: #141414;
     --color-dark-secondary: #0a0a0a;

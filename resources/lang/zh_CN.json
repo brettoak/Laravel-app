@@ -1,7 +1,7 @@
 {
-    "Password": "密码",
-    "Email": "电子邮箱",
+    "Password": "Password",
+    "Email": "Email",
     "filament-shield::filament-shield.nav.group": "Permission Management",
-    "filament-shield::filament-shield.nav.role.label": "角色管理",
-    "filament-shield::filament-shield.nav.role.plural_label": "角色管理"
+    "filament-shield::filament-shield.nav.role.label": "Role Management",
+    "filament-shield::filament-shield.nav.role.plural_label": "Role Management"
 }
