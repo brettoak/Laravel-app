@@ -8,6 +8,21 @@ class ReverbMultipleJobs extends Page
 {
     protected string $view = 'filament.pages.reverb-multiple-jobs';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Multiple Jobs Monitor';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 30;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-queue-list';

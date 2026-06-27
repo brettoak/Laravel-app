@@ -6,6 +6,15 @@ use Filament\Pages\Page;
 
 class ContentManagement extends Page
 {
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Content Management';
+    }
 
     public static function getNavigationIcon(): ?string
     {
@@ -20,7 +29,7 @@ class ContentManagement extends Page
 
     public static function getNavigationSort(): ?int
     {
-        return 0;
+        return 10;
     }
 
 

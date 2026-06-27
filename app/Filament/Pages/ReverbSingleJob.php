@@ -8,6 +8,21 @@ class ReverbSingleJob extends Page
 {
     protected string $view = 'filament.pages.reverb-single-job';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Single Job Monitor';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 20;
+    }
+
     protected function getHeaderActions(): array
     {
         return [];
@@ -20,7 +35,7 @@ class ReverbSingleJob extends Page
 
     public static function getNavigationIcon(): string
     {
-        return "heroicon-o-star";
+        return "heroicon-o-play-circle";
     }
 
     public function getTitle(): string

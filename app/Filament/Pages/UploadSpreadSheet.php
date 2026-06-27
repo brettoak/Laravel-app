@@ -7,6 +7,20 @@ use Filament\Support\Enums\Alignment;
 
 class UploadSpreadSheet extends Page
 {
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Operations';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Spreadsheet Import';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 40;
+    }
 
     public static function getNavigationIcon(): string
     {
