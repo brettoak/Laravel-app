@@ -84,9 +84,6 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
           cd /www/laravel-app/ && \
 
-          # Install the Faker package (used for generating fake data)
-          composer require fakerphp/faker --no-interaction && \
-
           # Install composer dependencies without dev packages and optimize autoloader
           composer install --no-dev --optimize-autoloader && \
 
