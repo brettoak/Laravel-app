@@ -127,7 +127,7 @@
                             maxlength="255"
                             autofocus
                             placeholder="Enter a clear, descriptive title"
-                            class="block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                            class="block w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-gray-900 shadow-sm outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-300 hover:bg-white focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-0 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.10)] dark:border-gray-700 dark:bg-gray-900/70 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:hover:bg-gray-900 dark:focus:border-primary-500 dark:focus:bg-gray-900 dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.16)]"
                         >
                         @error('title') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                     </div>
@@ -139,7 +139,7 @@
                             wire:model="content"
                             rows="9"
                             placeholder="Write the article content here"
-                            class="block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                            class="block w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-gray-900 shadow-sm outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-300 hover:bg-white focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-0 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.10)] dark:border-gray-700 dark:bg-gray-900/70 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:hover:bg-gray-900 dark:focus:border-primary-500 dark:focus:bg-gray-900 dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.16)]"
                         ></textarea>
                         <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Content must be at least 10 characters.</p>
                         @error('content') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
