@@ -9,14 +9,29 @@
         <!-- Header -->
         <div class="mb-8 flex justify-between items-center">
             <div>
-
-                <p class="mt-1 text-gray-500 dark:text-gray-400">Manage and oversee your platform's articles.</p>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Content Library</h2>
+                <p class="mt-1 text-gray-500 dark:text-gray-400">Create, review, and manage the articles published on your platform.</p>
             </div>
 
             <div class="flex gap-3">
-                 <!-- Actions (Future: Add New, Export, etc) -->
+                <button
+                    type="button"
+                    wire:click="openCreateModal"
+                    class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                >
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add Content
+                </button>
             </div>
         </div>
+
+        @if (session()->has('content-created') || session()->has('content-deleted'))
+            <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300" role="status">
+                {{ session('content-created') ?? session('content-deleted') }}
+            </div>
+        @endif
 
         <!-- Table Container -->
         <div class="bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-inner flex flex-col">
@@ -73,8 +88,8 @@
                                         <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
                                         </svg>
-                                        <span class="text-lg font-medium">No articles found</span>
-                                        <span class="text-sm">Create some articles to see them here.</span>
+                                        <span class="text-lg font-medium">No content yet</span>
+                                        <span class="text-sm">Select Add Content to publish your first article.</span>
                                     </div>
                                 </td>
                             </tr>
@@ -91,4 +106,54 @@
             @endif
         </div>
     </div>
+
+    @if ($showCreateModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="create-content-title">
+            <button type="button" wire:click="closeCreateModal" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" aria-label="Close add content form"></button>
+
+            <div class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 sm:p-8">
+                <div class="mb-6">
+                    <h3 id="create-content-title" class="text-xl font-semibold text-gray-900 dark:text-white">Add Content</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter the article details below. A URL slug will be generated automatically.</p>
+                </div>
+
+                <form wire:submit="create" class="space-y-5">
+                    <div>
+                        <label for="content-title" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+                        <input
+                            id="content-title"
+                            type="text"
+                            wire:model="title"
+                            maxlength="255"
+                            autofocus
+                            placeholder="Enter a clear, descriptive title"
+                            class="block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                        >
+                        @error('title') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="content-body" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Content</label>
+                        <textarea
+                            id="content-body"
+                            wire:model="content"
+                            rows="9"
+                            placeholder="Write the article content here"
+                            class="block w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                        ></textarea>
+                        <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Content must be at least 10 characters.</p>
+                        @error('content') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="flex justify-end gap-3 border-t border-gray-200 pt-5 dark:border-gray-700">
+                        <button type="button" wire:click="closeCreateModal" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Cancel</button>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="create" class="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-500 disabled:cursor-wait disabled:opacity-60">
+                            <span wire:loading.remove wire:target="create">Add Content</span>
+                            <span wire:loading wire:target="create">Adding...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>
