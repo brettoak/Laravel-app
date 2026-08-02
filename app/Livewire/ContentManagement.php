@@ -26,6 +26,19 @@ class ContentManagement extends Component
 
     public string $editContent = '';
 
+    public string $search = '';
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearSearch(): void
+    {
+        $this->search = '';
+        $this->resetPage();
+    }
+
     public function openCreateModal(): void
     {
         $this->resetValidation();
@@ -124,8 +137,19 @@ class ContentManagement extends Component
 
     public function render()
     {
+        $search = trim($this->search);
+
         return view('livewire.content-management', [
-            'articles' => Article::with('user')->latest()->paginate(10),
+            'articles' => Article::with('user')
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('title', 'like', "%{$search}%")
+                            ->orWhere('slug', 'like', "%{$search}%")
+                            ->orWhere('content', 'like', "%{$search}%");
+                    });
+                })
+                ->latest()
+                ->paginate(10),
         ]);
     }
 }
