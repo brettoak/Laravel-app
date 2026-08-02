@@ -14,9 +14,17 @@ class ContentManagement extends Component
 
     public bool $showCreateModal = false;
 
+    public bool $showEditModal = false;
+
     public string $title = '';
 
     public string $content = '';
+
+    public ?int $editingArticleId = null;
+
+    public string $editTitle = '';
+
+    public string $editContent = '';
 
     public function openCreateModal(): void
     {
@@ -51,6 +59,43 @@ class ContentManagement extends Component
         session()->flash('content-created', 'Content was added successfully.');
     }
 
+    public function openEditModal(int $id): void
+    {
+        $article = Article::findOrFail($id);
+
+        $this->resetValidation();
+        $this->editingArticleId = $article->id;
+        $this->editTitle = $article->title;
+        $this->editContent = $article->content;
+        $this->showEditModal = true;
+    }
+
+    public function closeEditModal(): void
+    {
+        $this->showEditModal = false;
+        $this->reset(['editingArticleId', 'editTitle', 'editContent']);
+        $this->resetValidation();
+    }
+
+    public function update(): void
+    {
+        $validated = $this->validate([
+            'editTitle' => ['required', 'string', 'max:255'],
+            'editContent' => ['required', 'string', 'min:10'],
+        ]);
+
+        $article = Article::findOrFail($this->editingArticleId);
+
+        $article->update([
+            'title' => $validated['editTitle'],
+            'content' => $validated['editContent'],
+            'slug' => $this->uniqueSlug($validated['editTitle'], $article->id),
+        ]);
+
+        $this->closeEditModal();
+        session()->flash('content-updated', 'Content was updated successfully.');
+    }
+
     public function delete(int $id): void
     {
         $article = Article::find($id);
@@ -61,13 +106,15 @@ class ContentManagement extends Component
         }
     }
 
-    private function uniqueSlug(string $title): string
+    private function uniqueSlug(string $title, ?int $ignoreArticleId = null): string
     {
         $baseSlug = Str::slug($title) ?: 'content';
         $slug = $baseSlug;
         $suffix = 2;
 
-        while (Article::where('slug', $slug)->exists()) {
+        while (Article::where('slug', $slug)
+            ->when($ignoreArticleId, fn ($query) => $query->whereKeyNot($ignoreArticleId))
+            ->exists()) {
             $slug = "{$baseSlug}-{$suffix}";
             $suffix++;
         }

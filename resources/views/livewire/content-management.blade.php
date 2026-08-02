@@ -27,9 +27,9 @@
             </div>
         </div>
 
-        @if (session()->has('content-created') || session()->has('content-deleted'))
+        @if (session()->has('content-created') || session()->has('content-updated') || session()->has('content-deleted'))
             <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300" role="status">
-                {{ session('content-created') ?? session('content-deleted') }}
+                {{ session('content-created') ?? session('content-updated') ?? session('content-deleted') }}
             </div>
         @endif
 
@@ -48,7 +48,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-transparent">
                         @forelse($articles as $article)
-                            <tr class="hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-colors duration-200">
+                            <tr wire:key="article-{{ $article->id }}" class="hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-colors duration-200">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $article->title }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ $article->slug }}</div>
@@ -71,8 +71,16 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $article->created_at->format('M d, Y') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                                     <button
+                                        type="button"
+                                        wire:click="openEditModal({{ $article->id }})"
+                                        class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        type="button"
                                         wire:click="delete({{ $article->id }})"
                                         wire:confirm="Are you sure you want to delete this article?"
                                         class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
@@ -150,6 +158,56 @@
                         <button type="submit" wire:loading.attr="disabled" wire:target="create" class="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-500 disabled:cursor-wait disabled:opacity-60">
                             <span wire:loading.remove wire:target="create">Add Content</span>
                             <span wire:loading wire:target="create">Adding...</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    @if ($showEditModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="edit-content-title">
+            <button type="button" wire:click="closeEditModal" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" aria-label="Close edit content form"></button>
+
+            <div class="relative w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800 sm:p-8">
+                <div class="mb-6">
+                    <h3 id="edit-content-title" class="text-xl font-semibold text-gray-900 dark:text-white">Edit Content</h3>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update the article details below. The URL slug will follow the title automatically.</p>
+                </div>
+
+                <form wire:submit="update" class="space-y-5">
+                    <div>
+                        <label for="edit-content-title-input" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+                        <input
+                            id="edit-content-title-input"
+                            type="text"
+                            wire:model="editTitle"
+                            maxlength="255"
+                            autofocus
+                            placeholder="Enter a clear, descriptive title"
+                            class="block w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-gray-900 shadow-sm outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-300 hover:bg-white focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-0 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.10)] dark:border-gray-700 dark:bg-gray-900/70 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:hover:bg-gray-900 dark:focus:border-primary-500 dark:focus:bg-gray-900 dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.16)]"
+                        >
+                        @error('editTitle') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label for="edit-content-body" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-200">Content</label>
+                        <textarea
+                            id="edit-content-body"
+                            wire:model="editContent"
+                            rows="9"
+                            placeholder="Write the article content here"
+                            class="block w-full rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-gray-900 shadow-sm outline-none transition duration-200 placeholder:text-gray-400 hover:border-gray-300 hover:bg-white focus:border-primary-400 focus:bg-white focus:outline-none focus:ring-0 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.10)] dark:border-gray-700 dark:bg-gray-900/70 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:hover:bg-gray-900 dark:focus:border-primary-500 dark:focus:bg-gray-900 dark:focus:shadow-[0_0_0_3px_rgba(99,102,241,0.16)]"
+                        ></textarea>
+                        <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Content must be at least 10 characters.</p>
+                        @error('editContent') <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="flex justify-end gap-3 border-t border-gray-200 pt-5 dark:border-gray-700">
+                        <button type="button" wire:click="closeEditModal" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700">Cancel</button>
+                        <button type="submit" wire:loading.attr="disabled" wire:target="update" class="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-500 disabled:cursor-wait disabled:opacity-60">
+                            <span wire:loading.remove wire:target="update">Save Changes</span>
+                            <span wire:loading wire:target="update">Saving...</span>
                         </button>
                     </div>
                 </form>
