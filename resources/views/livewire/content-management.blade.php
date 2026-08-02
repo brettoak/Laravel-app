@@ -27,6 +27,45 @@
             </div>
         </div>
 
+        <!-- Search -->
+        <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="relative w-full sm:max-w-md">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"></path>
+                    </svg>
+                </div>
+                <input
+                    type="search"
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Search title, slug, or content..."
+                    aria-label="Search content"
+                    class="block w-full rounded-xl border border-gray-200 bg-white/80 py-3 pl-11 pr-11 text-sm text-gray-900 shadow-sm outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 dark:border-gray-700 dark:bg-gray-900/70 dark:text-white dark:placeholder:text-gray-500 dark:hover:border-gray-600 dark:focus:border-primary-500 dark:focus:ring-primary-500/15"
+                >
+                @if ($search !== '')
+                    <button
+                        type="button"
+                        wire:click="clearSearch"
+                        title="Clear search"
+                        aria-label="Clear search"
+                        class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition hover:text-gray-700 focus:outline-none dark:hover:text-gray-200"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                @endif
+            </div>
+
+            @if (trim($search) !== '')
+                <p class="text-sm text-gray-500 dark:text-gray-400" role="status">
+                    <span class="font-semibold text-gray-700 dark:text-gray-200">{{ $articles->total() }}</span>
+                    {{ Str::plural('result', $articles->total()) }} for
+                    <span class="font-medium text-primary-600 dark:text-primary-400">“{{ trim($search) }}”</span>
+                </p>
+            @endif
+        </div>
+
         @if (session()->has('content-created') || session()->has('content-updated') || session()->has('content-deleted'))
             <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-300" role="status">
                 {{ session('content-created') ?? session('content-updated') ?? session('content-deleted') }}
@@ -71,22 +110,34 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $article->created_at->format('M d, Y') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                                    <button
-                                        type="button"
-                                        wire:click="openEditModal({{ $article->id }})"
-                                        class="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type="button"
-                                        wire:click="delete({{ $article->id }})"
-                                        wire:confirm="Are you sure you want to delete this article?"
-                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                                    >
-                                        Delete
-                                    </button>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button
+                                            type="button"
+                                            wire:click="openEditModal({{ $article->id }})"
+                                            title="Edit {{ $article->title }}"
+                                            aria-label="Edit {{ $article->title }}"
+                                            class="group inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary-300 hover:bg-primary-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300 dark:hover:border-primary-400/50 dark:hover:bg-primary-500/20 dark:focus:ring-offset-gray-900"
+                                        >
+                                            <svg class="h-4 w-4 transition-transform duration-200 group-hover:rotate-[-6deg]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.862 3.487 1.651-1.651a2.121 2.121 0 1 1 3 3L10.582 15.768a4.5 4.5 0 0 1-1.897 1.13l-3.19.957.957-3.19a4.5 4.5 0 0 1 1.13-1.897L16.862 3.487ZM16.862 3.487 19.85 6.475M18 14.25V19.5A1.5 1.5 0 0 1 16.5 21h-12A1.5 1.5 0 0 1 3 19.5v-12A1.5 1.5 0 0 1 4.5 6H9.75"></path>
+                                            </svg>
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            wire:click="delete({{ $article->id }})"
+                                            wire:confirm="Are you sure you want to delete this article?"
+                                            title="Delete {{ $article->title }}"
+                                            aria-label="Delete {{ $article->title }}"
+                                            class="group inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 dark:hover:border-red-400/50 dark:hover:bg-red-500/20 dark:focus:ring-offset-gray-900"
+                                        >
+                                            <svg class="h-4 w-4 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-2.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.477c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -96,8 +147,13 @@
                                         <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
                                         </svg>
-                                        <span class="text-lg font-medium">No content yet</span>
-                                        <span class="text-sm">Select Add Content to publish your first article.</span>
+                                        @if (trim($search) !== '')
+                                            <span class="text-lg font-medium">No matching content</span>
+                                            <span class="text-sm">Try another title, slug, or keyword.</span>
+                                        @else
+                                            <span class="text-lg font-medium">No content yet</span>
+                                            <span class="text-sm">Select Add Content to publish your first article.</span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
