@@ -141,4 +141,52 @@ class ContentManagementTest extends TestCase
             'slug' => 'release-notes-2',
         ]);
     }
+
+    public function test_content_can_be_searched_by_title_slug_or_body(): void
+    {
+        $user = User::factory()->create();
+
+        Article::factory()->for($user)->create([
+            'title' => 'Launch Plan',
+            'slug' => 'product-roadmap',
+            'content' => 'The release timeline is ready.',
+        ]);
+        Article::factory()->for($user)->create([
+            'title' => 'Marketing Notes',
+            'slug' => 'launch-campaign',
+            'content' => 'Campaign details are ready.',
+        ]);
+        Article::factory()->for($user)->create([
+            'title' => 'Security Brief',
+            'slug' => 'security-brief',
+            'content' => 'Checklist for launch day.',
+        ]);
+        Article::factory()->for($user)->create([
+            'title' => 'Unrelated Article',
+            'slug' => 'unrelated-article',
+            'content' => 'This entry should be hidden.',
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(ContentManagement::class)
+            ->set('search', 'launch')
+            ->assertSee('Launch Plan')
+            ->assertSee('Marketing Notes')
+            ->assertSee('Security Brief')
+            ->assertDontSee('Unrelated Article');
+    }
+
+    public function test_search_can_be_cleared(): void
+    {
+        $user = User::factory()->create();
+        Article::factory()->for($user)->create(['title' => 'Visible Article']);
+
+        Livewire::actingAs($user)
+            ->test(ContentManagement::class)
+            ->set('search', 'missing')
+            ->assertSee('No matching content')
+            ->call('clearSearch')
+            ->assertSet('search', '')
+            ->assertSee('Visible Article');
+    }
 }
