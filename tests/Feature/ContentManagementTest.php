@@ -81,6 +81,35 @@ class ContentManagementTest extends TestCase
             ->assertSet('editContent', 'Original article content.');
     }
 
+    public function test_article_content_can_be_viewed_and_the_modal_can_be_closed(): void
+    {
+        $author = User::factory()->create(['name' => 'Article Author']);
+        $article = Article::factory()->for($author)->create([
+            'title' => 'A detailed article',
+            'content' => "The complete article body.\nIt keeps its line breaks.",
+            'slug' => 'a-detailed-article',
+            'views' => 1234,
+        ]);
+
+        Livewire::actingAs(User::factory()->create())
+            ->test(ContentManagement::class)
+            ->call('openViewModal', $article->id)
+            ->assertSet('showViewModal', true)
+            ->assertSet('viewingArticleId', $article->id)
+            ->assertSet('viewTitle', 'A detailed article')
+            ->assertSet('viewContent', "The complete article body.\nIt keeps its line breaks.")
+            ->assertSet('viewSlug', 'a-detailed-article')
+            ->assertSet('viewAuthor', 'Article Author')
+            ->assertSet('viewViews', 1234)
+            ->assertSee('The complete article body.')
+            ->assertSee('Article Author')
+            ->assertSee('1,234')
+            ->call('closeViewModal')
+            ->assertSet('showViewModal', false)
+            ->assertSet('viewingArticleId', null)
+            ->assertSet('viewContent', '');
+    }
+
     public function test_authenticated_user_can_edit_content(): void
     {
         $article = Article::factory()->create([
