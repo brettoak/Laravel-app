@@ -87,9 +87,13 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-transparent">
                         @forelse($articles as $article)
-                            <tr wire:key="article-{{ $article->id }}" class="hover:bg-blue-50/30 dark:hover:bg-blue-900/20 transition-colors duration-200">
+                            <tr
+                                wire:key="article-{{ $article->id }}"
+                                wire:click="openViewModal({{ $article->id }})"
+                                class="group/row cursor-pointer hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-colors duration-200"
+                            >
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $article->title }}</div>
+                                    <div class="text-sm font-medium text-gray-900 transition-colors group-hover/row:text-primary-600 dark:text-white dark:group-hover/row:text-primary-400">{{ $article->title }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ $article->slug }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -114,7 +118,20 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <button
                                             type="button"
-                                            wire:click="openEditModal({{ $article->id }})"
+                                            wire:click.stop="openViewModal({{ $article->id }})"
+                                            title="View {{ $article->title }}"
+                                            aria-label="View {{ $article->title }}"
+                                            class="group inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-500 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-900"
+                                        >
+                                            <svg class="h-4 w-4 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12 21.75 12 18 18.75 12 18.75 2.25 12 2.25 12Z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+                                            </svg>
+                                            View
+                                        </button>
+                                        <button
+                                            type="button"
+                                            wire:click.stop="openEditModal({{ $article->id }})"
                                             title="Edit {{ $article->title }}"
                                             aria-label="Edit {{ $article->title }}"
                                             class="group inline-flex items-center gap-1.5 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-primary-300 hover:bg-primary-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300 dark:hover:border-primary-400/50 dark:hover:bg-primary-500/20 dark:focus:ring-offset-gray-900"
@@ -126,7 +143,7 @@
                                         </button>
                                         <button
                                             type="button"
-                                            wire:click="delete({{ $article->id }})"
+                                            wire:click.stop="delete({{ $article->id }})"
                                             wire:confirm="Are you sure you want to delete this article?"
                                             title="Delete {{ $article->title }}"
                                             aria-label="Delete {{ $article->title }}"
@@ -170,6 +187,43 @@
             @endif
         </div>
     </div>
+
+    @if ($showViewModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="view-content-title">
+            <button type="button" wire:click="closeViewModal" class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm" aria-label="Close content details"></button>
+
+            <article class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
+                <header class="border-b border-gray-200 px-6 py-5 dark:border-gray-700 sm:px-8">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <p class="mb-1 text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">Content details</p>
+                            <h3 id="view-content-title" class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">{{ $viewTitle }}</h3>
+                            <p class="mt-1 break-all text-sm text-gray-500 dark:text-gray-400">{{ $viewSlug }}</p>
+                        </div>
+                        <button type="button" wire:click="closeViewModal" aria-label="Close content details" class="shrink-0 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:hover:bg-gray-700 dark:hover:text-gray-200">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <dl class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex gap-1.5"><dt class="font-medium text-gray-700 dark:text-gray-200">Author:</dt><dd>{{ $viewAuthor }}</dd></div>
+                        <div class="flex gap-1.5"><dt class="font-medium text-gray-700 dark:text-gray-200">Created:</dt><dd>{{ $viewCreatedAt }}</dd></div>
+                        <div class="flex gap-1.5"><dt class="font-medium text-gray-700 dark:text-gray-200">Views:</dt><dd>{{ number_format($viewViews) }}</dd></div>
+                    </dl>
+                </header>
+
+                <div class="overflow-y-auto px-6 py-6 sm:px-8">
+                    <div class="whitespace-pre-wrap break-words text-sm leading-7 text-gray-700 dark:text-gray-200">{{ $viewContent }}</div>
+                </div>
+
+                <footer class="flex justify-end border-t border-gray-200 bg-gray-50/70 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40 sm:px-8">
+                    <button type="button" wire:click="closeViewModal" class="rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Close</button>
+                </footer>
+            </article>
+        </div>
+    @endif
 
     @if ($showCreateModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="create-content-title">
