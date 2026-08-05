@@ -16,6 +16,8 @@ class ContentManagement extends Component
 
     public bool $showEditModal = false;
 
+    public bool $showViewModal = false;
+
     public string $title = '';
 
     public string $content = '';
@@ -25,6 +27,20 @@ class ContentManagement extends Component
     public string $editTitle = '';
 
     public string $editContent = '';
+
+    public ?int $viewingArticleId = null;
+
+    public string $viewTitle = '';
+
+    public string $viewContent = '';
+
+    public string $viewSlug = '';
+
+    public string $viewAuthor = '';
+
+    public int $viewViews = 0;
+
+    public string $viewCreatedAt = '';
 
     public string $search = '';
 
@@ -81,6 +97,34 @@ class ContentManagement extends Component
         $this->editTitle = $article->title;
         $this->editContent = $article->content;
         $this->showEditModal = true;
+    }
+
+    public function openViewModal(int $id): void
+    {
+        $article = Article::with('user')->findOrFail($id);
+
+        $this->viewingArticleId = $article->id;
+        $this->viewTitle = $article->title;
+        $this->viewContent = $article->content;
+        $this->viewSlug = $article->slug;
+        $this->viewAuthor = $article->user?->name ?? 'Unknown';
+        $this->viewViews = $article->views;
+        $this->viewCreatedAt = $article->created_at->format('M d, Y');
+        $this->showViewModal = true;
+    }
+
+    public function closeViewModal(): void
+    {
+        $this->showViewModal = false;
+        $this->reset([
+            'viewingArticleId',
+            'viewTitle',
+            'viewContent',
+            'viewSlug',
+            'viewAuthor',
+            'viewViews',
+            'viewCreatedAt',
+        ]);
     }
 
     public function closeEditModal(): void
