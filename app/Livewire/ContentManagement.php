@@ -2,11 +2,14 @@
 
 namespace App\Livewire;
 
+use App\Exports\ContentExport;
 use App\Models\Article;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ContentManagement extends Component
 {
@@ -53,6 +56,22 @@ class ContentManagement extends Component
     {
         $this->search = '';
         $this->resetPage();
+    }
+
+    public function export(ContentExport $exporter): StreamedResponse
+    {
+        $path = $exporter->create($this->articlesQuery()->get());
+        $filename = 'content-export-'.now()->format('Y-m-d-His').'.xlsx';
+
+        return response()->streamDownload(function () use ($path): void {
+            try {
+                readfile($path);
+            } finally {
+                @unlink($path);
+            }
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     public function openCreateModal(): void
@@ -181,19 +200,23 @@ class ContentManagement extends Component
 
     public function render()
     {
+        return view('livewire.content-management', [
+            'articles' => $this->articlesQuery()->paginate(10),
+        ]);
+    }
+
+    private function articlesQuery(): Builder
+    {
         $search = trim($this->search);
 
-        return view('livewire.content-management', [
-            'articles' => Article::with('user')
-                ->when($search !== '', function ($query) use ($search) {
-                    $query->where(function ($query) use ($search) {
-                        $query->where('title', 'like', "%{$search}%")
-                            ->orWhere('slug', 'like', "%{$search}%")
-                            ->orWhere('content', 'like', "%{$search}%");
-                    });
-                })
-                ->latest()
-                ->paginate(10),
-        ]);
+        return Article::with('user')
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(function (Builder $query) use ($search): void {
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('content', 'like', "%{$search}%");
+                });
+            })
+            ->latest();
     }
 }
