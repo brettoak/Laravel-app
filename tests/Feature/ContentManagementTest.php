@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Exports\ContentExport;
 use App\Livewire\ContentManagement;
 use App\Models\Article;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -217,5 +219,83 @@ class ContentManagementTest extends TestCase
             ->call('clearSearch')
             ->assertSet('search', '')
             ->assertSee('Visible Article');
+    }
+
+    public function test_content_can_be_exported_to_excel_using_the_current_search(): void
+    {
+        Carbon::setTestNow('2026-08-19 14:30:45');
+        $path = null;
+
+        try {
+            $user = User::factory()->create(['name' => 'Export Author']);
+
+            Article::factory()->for($user)->create([
+                'title' => 'Export this article',
+                'slug' => 'export-this-article',
+                'content' => 'Matching export content.',
+                'views' => 25,
+            ]);
+            Article::factory()->for($user)->create(['title' => 'Leave this article out']);
+
+            $component = Livewire::actingAs($user)
+                ->test(ContentManagement::class)
+                ->set('search', 'Matching export')
+                ->call('export')
+                ->assertFileDownloaded(
+                    'content-export-2026-08-19-143045.xlsx',
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                );
+
+            $temporaryPath = tempnam(sys_get_temp_dir(), 'downloaded-content-');
+            $path = $temporaryPath.'.xlsx';
+            rename($temporaryPath, $path);
+
+            $download = base64_decode(data_get($component->effects, 'download.content'), true);
+            $this->assertNotFalse($download);
+            file_put_contents($path, $download);
+
+            $archive = new \PharData($path);
+            $sheet = $archive['xl/worksheets/sheet1.xml']->getContent();
+
+            $this->assertStringContainsString('Export this article', $sheet);
+            $this->assertStringNotContainsString('Leave this article out', $sheet);
+        } finally {
+            unset($archive);
+
+            if ($path !== null) {
+                @unlink($path);
+            }
+
+            Carbon::setTestNow();
+        }
+    }
+
+    public function test_excel_export_contains_article_data_and_workbook_formatting(): void
+    {
+        $author = User::factory()->create(['name' => 'Spreadsheet Author']);
+        $article = Article::factory()->for($author)->create([
+            'title' => 'Quarterly <Review>',
+            'slug' => 'quarterly-review',
+            'content' => "A detailed report.\nSecond line.",
+            'views' => 1200,
+        ]);
+
+        $path = app(ContentExport::class)->create(collect([$article->load('user')]));
+
+        try {
+            $archive = new \PharData($path);
+            $sheet = $archive['xl/worksheets/sheet1.xml']->getContent();
+
+            $this->assertStringContainsString('name="Content"', $archive['xl/workbook.xml']->getContent());
+            $this->assertStringContainsString('state="frozen"', $sheet);
+            $this->assertStringContainsString('<autoFilter ref="A1:H2"/>', $sheet);
+            $this->assertStringContainsString('Quarterly &lt;Review&gt;', $sheet);
+            $this->assertStringContainsString('Spreadsheet Author', $sheet);
+            $this->assertStringContainsString('A detailed report.', $sheet);
+            $this->assertStringContainsString('<v>1200</v>', $sheet);
+        } finally {
+            unset($archive);
+            @unlink($path);
+        }
     }
 }
