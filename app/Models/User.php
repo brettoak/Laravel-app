@@ -91,6 +91,16 @@ class User extends Authenticatable implements FilamentUser, WebAuthnAuthenticata
         return $this->hasMany(Comment::class);
     }
 
+    public function requestedTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'requester_id');
+    }
+
+    public function assignedTickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'assignee_id');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return true;
