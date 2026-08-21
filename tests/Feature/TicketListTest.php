@@ -24,6 +24,18 @@ class TicketListTest extends TestCase
             ->assertSee('Ticket management');
     }
 
+    public function test_ticket_page_is_available_in_the_filament_admin_panel(): void
+    {
+        $this->get('/admin/ticket-management')
+            ->assertRedirect('/admin/login');
+
+        $this->actingAs(User::factory()->create())
+            ->get('/admin/ticket-management')
+            ->assertOk()
+            ->assertSee('Ticket Management')
+            ->assertSee('Search, filter and prioritise customer requests.');
+    }
+
     public function test_tickets_can_be_searched_by_ticket_details_and_people(): void
     {
         $viewer = User::factory()->create();
