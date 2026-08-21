@@ -54,4 +54,6 @@ Route::middleware([
     Route::get('/reverb/multiple/jobs', [ReverbMultipleJobs::class, 'index']);
 
     Route::get('/conversation', [Conversation::class, 'index']);
+
+    Route::view('/tickets', 'tickets.index')->name('tickets.index');
 });
