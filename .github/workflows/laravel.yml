@@ -57,32 +57,48 @@ jobs:
 
       # 6. Setup SSH
       - name: Setup SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
 
       # 7. Deploy to server using rsync
       - name: Deploy Laravel App
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_DIR: ${{ secrets.LARAVEL_DEPLOY_DIR }}
         run: |
+          if [[ ! "$DEPLOY_DIR" =~ ^/[A-Za-z0-9._/-]+$ ]]; then
+            echo "LARAVEL_DEPLOY_DIR must be a non-empty absolute path."
+            exit 1
+          fi
+
           ssh -o StrictHostKeyChecking=no \
-          -i ~/.ssh/id_rsa \
-          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-          "sudo chown -R ${{ secrets.SSH_USER }}:${{ secrets.SSH_USER }} ${{ secrets.LARAVEL_DEPLOY_DIR }}"
+            -i ~/.ssh/id_rsa \
+            "$SSH_USER@$SSH_HOST" \
+            "sudo mkdir -p '$DEPLOY_DIR' && sudo chown -R \$(id -un):\$(id -gn) '$DEPLOY_DIR'"
 
           rsync -az --delete \
             -e "ssh -i ~/.ssh/id_rsa" \
             --exclude ".env" \
             --exclude "ca.pem" \
             ./ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.LARAVEL_DEPLOY_DIR }}
+            "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/"
 
       # 8. Run Laravel commands on server
       - name: Run post-deploy commands on server
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_DIR: ${{ secrets.LARAVEL_DEPLOY_DIR }}
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-          cd /www/laravel-app/ && \
+          ssh -i ~/.ssh/id_rsa "$SSH_USER@$SSH_HOST" "
+          cd '$DEPLOY_DIR' && \
 
           # Install composer dependencies without dev packages and optimize autoloader
           composer install --no-dev --optimize-autoloader && \
