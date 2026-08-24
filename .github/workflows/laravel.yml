@@ -109,15 +109,21 @@ jobs:
           # Set read/write/execute permissions for owner and group on storage and bootstrap/cache
           sudo chmod -R 775 storage bootstrap/cache && \
 
+          # Remove the config cache copied from CI without touching the database cache
+          sudo -u www-data php artisan config:clear && \
+
+          # Create application tables before optimize:clear accesses the database cache
+          sudo -u www-data php artisan migrate --force && \
+
           # Clear all existing caches to ensure fresh state
-          sudo php artisan optimize:clear && \
+          sudo -u www-data php artisan optimize:clear && \
 
           # Cache the configuration for better performance
-          sudo php artisan config:cache && \
+          sudo -u www-data php artisan config:cache && \
 
           # Cache the routes to improve route lookup performance
-          sudo php artisan route:cache && \
+          sudo -u www-data php artisan route:cache && \
 
           # Cache the compiled views for faster rendering
-          sudo php artisan view:cache
+          sudo -u www-data php artisan view:cache
           "
