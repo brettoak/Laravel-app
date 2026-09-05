@@ -87,6 +87,8 @@ jobs:
             -e "ssh -i ~/.ssh/id_rsa" \
             --exclude ".env" \
             --exclude "ca.pem" \
+            --exclude "/storage/" \
+            --exclude "/bootstrap/cache/" \
             ./ \
             "$SSH_USER@$SSH_HOST:$DEPLOY_DIR/"
 
@@ -100,14 +102,18 @@ jobs:
           ssh -i ~/.ssh/id_rsa "$SSH_USER@$SSH_HOST" "
           cd '$DEPLOY_DIR' && \
 
+          # Ensure runtime directories exist when deploying to a new server
+          sudo mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && \
+
           # Install composer dependencies without dev packages and optimize autoloader
           composer install --no-dev --optimize-autoloader && \
 
           # Change ownership of storage and bootstrap/cache to www-data user/group
           sudo chown -R www-data:www-data storage bootstrap/cache && \
 
-          # Set read/write/execute permissions for owner and group on storage and bootstrap/cache
-          sudo chmod -R 775 storage bootstrap/cache && \
+          # Directories inherit the www-data group; runtime files do not need execute permission
+          sudo find storage bootstrap/cache -type d -exec chmod 2775 {} + && \
+          sudo find storage bootstrap/cache -type f -exec chmod 664 {} + && \
 
           # Remove the config cache copied from CI without touching the database cache
           sudo -u www-data php artisan config:clear && \
@@ -125,5 +131,14 @@ jobs:
           sudo -u www-data php artisan route:cache && \
 
           # Cache the compiled views for faster rendering
-          sudo -u www-data php artisan view:cache
+          sudo -u www-data php artisan view:cache && \
+
+          # Repair runtime permissions after all deployment commands have finished
+          sudo chown -R www-data:www-data storage bootstrap/cache && \
+          sudo find storage bootstrap/cache -type d -exec chmod 2775 {} + && \
+          sudo find storage bootstrap/cache -type f -exec chmod 664 {} + && \
+
+          # Fail deployment if the web user cannot append to the application log
+          sudo -u www-data touch storage/logs/laravel.log && \
+          sudo -u www-data test -w storage/logs/laravel.log
           "
