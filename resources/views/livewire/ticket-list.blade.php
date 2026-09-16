@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8">
     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="border-b border-gray-200 px-6 py-6 dark:border-gray-700">
             <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -12,8 +12,8 @@
                 </p>
             </div>
 
-            <div class="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-                <div class="relative xl:col-span-4">
+            <div class="mt-6 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12">
+                <div class="relative min-w-0 xl:col-span-4">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m2.1-5.4a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" />
@@ -28,28 +28,28 @@
                     >
                 </div>
 
-                <select wire:model.live="status" aria-label="Filter by status" class="rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
+                <select wire:model.live="status" aria-label="Filter by status" class="w-full min-w-0 rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
                     <option value="">All statuses</option>
                     @foreach ($statuses as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
 
-                <select wire:model.live="priority" aria-label="Filter by priority" class="rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
+                <select wire:model.live="priority" aria-label="Filter by priority" class="w-full min-w-0 rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
                     <option value="">All priorities</option>
                     @foreach ($priorities as $value => $label)
                         <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
 
-                <select wire:model.live="assignee" aria-label="Filter by assignee" class="rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
+                <select wire:model.live="assignee" aria-label="Filter by assignee" class="w-full min-w-0 rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white xl:col-span-2">
                     <option value="">All assignees</option>
                     @foreach ($assignees as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
                 </select>
 
-                <div class="flex gap-2 xl:col-span-2">
+                <div class="flex min-w-0 gap-2 xl:col-span-2">
                     <select wire:model.live="perPage" aria-label="Tickets per page" class="min-w-0 flex-1 rounded-lg border-gray-300 py-2.5 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
                         <option value="10">10 / page</option>
                         <option value="25">25 / page</option>
