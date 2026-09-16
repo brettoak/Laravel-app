@@ -9,7 +9,7 @@ use Illuminate\Database\Seeder;
 class TicketSeeder extends Seeder
 {
     /**
-     * Seed tickets for the ticket management page.
+     * Add 2560 tickets for the ticket management page.
      */
     public function run(): void
     {
@@ -41,7 +41,7 @@ class TicketSeeder extends Seeder
         ];
 
         Ticket::factory()
-            ->count(1000)
+            ->count(2560)
             ->state(function () use ($userIds, $titles): array {
                 $status = fake()->randomElement([
                     'open', 'open', 'open', 'open',
