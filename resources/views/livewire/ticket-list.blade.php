@@ -183,15 +183,8 @@
             </table>
         </div>
 
-        <div class="space-y-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400" role="status" aria-live="polite" aria-atomic="true">
-                Page <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($tickets->currentPage()) }}</span>
-                of <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($tickets->lastPage()) }}</span>
-            </p>
-
-            @if ($tickets->hasPages())
-                {{ $tickets->links() }}
-            @endif
+        <div class="border-t border-gray-200 px-4 py-4 sm:px-6 dark:border-gray-700">
+            {{ $tickets->onEachSide(1)->links('livewire.partials.ticket-pagination') }}
         </div>
     </div>
 </div>

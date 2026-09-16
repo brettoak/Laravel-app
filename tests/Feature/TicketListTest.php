@@ -147,6 +147,40 @@ class TicketListTest extends TestCase
             ->assertViewHas('tickets', fn ($tickets) => $tickets->count() === 11 && $tickets->total() === 11);
     }
 
+    public function test_tickets_can_navigate_using_numbered_previous_and_next_pages(): void
+    {
+        $viewer = User::factory()->create();
+
+        Ticket::factory()->count(26)->create([
+            'requester_id' => $viewer->id,
+            'assignee_id' => null,
+            'status' => 'open',
+        ]);
+        Ticket::factory()->create([
+            'requester_id' => $viewer->id,
+            'assignee_id' => null,
+            'status' => 'closed',
+        ]);
+
+        Livewire::actingAs($viewer)->test(TicketList::class)
+            ->assertSee('Ticket pagination')
+            ->assertSee('Go to page 3')
+            ->assertDontSee('ticket-jump-page')
+            ->call('gotoPage', 3)
+            ->assertViewHas('tickets', fn ($tickets) => $tickets->currentPage() === 3 && $tickets->count() === 7)
+            ->call('previousPage')
+            ->assertSet('paginators.page', 2)
+            ->call('nextPage')
+            ->assertSet('paginators.page', 3)
+            ->set('perPage', 25)
+            ->assertSet('paginators.page', 1)
+            ->call('gotoPage', 2)
+            ->assertViewHas('tickets', fn ($tickets) => $tickets->currentPage() === 2 && $tickets->count() === 2)
+            ->set('status', 'closed')
+            ->assertSet('paginators.page', 1)
+            ->assertViewHas('tickets', fn ($tickets) => $tickets->lastPage() === 1 && $tickets->count() === 1);
+    }
+
     public function test_all_filters_can_be_cleared(): void
     {
         Livewire::actingAs(User::factory()->create())
