@@ -183,10 +183,15 @@
             </table>
         </div>
 
-        @if ($tickets->hasPages())
-            <div class="border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+        <div class="space-y-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400" role="status" aria-live="polite" aria-atomic="true">
+                Page <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($tickets->currentPage()) }}</span>
+                of <span class="font-semibold text-gray-900 dark:text-white">{{ number_format($tickets->lastPage()) }}</span>
+            </p>
+
+            @if ($tickets->hasPages())
                 {{ $tickets->links() }}
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 </div>
