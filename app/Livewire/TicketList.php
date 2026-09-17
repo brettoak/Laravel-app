@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -13,6 +14,25 @@ use Livewire\WithPagination;
 class TicketList extends Component
 {
     use WithPagination;
+
+    #[Locked]
+    public ?int $selectedTicketId = null;
+
+    public bool $showTicketDetails = false;
+
+    public function openTicket(int $ticketId): void
+    {
+        abort_unless(auth()->check(), 403);
+
+        $this->selectedTicketId = Ticket::query()->findOrFail($ticketId)->id;
+        $this->showTicketDetails = true;
+    }
+
+    public function closeTicket(): void
+    {
+        $this->selectedTicketId = null;
+        $this->showTicketDetails = false;
+    }
 
     #[Url(as: 'q', except: '')]
     public string $search = '';
@@ -96,6 +116,9 @@ class TicketList extends Component
         $perPage = in_array($this->perPage, [10, 25, 50], true) ? $this->perPage : 10;
 
         return view('livewire.ticket-list', [
+            'selectedTicket' => $this->showTicketDetails && $this->selectedTicketId !== null && auth()->check()
+                ? Ticket::query()->with('assignee:id,name')->find($this->selectedTicketId)
+                : null,
             'tickets' => $this->ticketsQuery()->paginate($perPage),
             'assignees' => User::query()
                 ->whereHas('assignedTickets')
