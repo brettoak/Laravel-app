@@ -109,10 +109,12 @@
                     @forelse ($tickets as $ticket)
                         <tr wire:key="ticket-{{ $ticket->id }}" class="transition hover:bg-gray-50 dark:hover:bg-gray-700/50">
                             <td class="whitespace-nowrap px-6 py-4 text-sm font-semibold text-primary-600 dark:text-primary-400">
-                                {{ $ticket->ticket_number }}
+                                <button type="button" wire:click="openTicket({{ $ticket->id }})" class="rounded hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500" aria-label="View ticket {{ $ticket->ticket_number }}" aria-haspopup="dialog">
+                                    {{ $ticket->ticket_number }}
+                                </button>
                             </td>
                             <td class="px-6 py-4">
-                                <p class="max-w-sm truncate text-sm font-medium text-gray-900 dark:text-white" title="{{ $ticket->title }}">{{ $ticket->title }}</p>
+                                <button type="button" wire:click="openTicket({{ $ticket->id }})" class="block max-w-sm truncate rounded text-left text-sm font-medium text-gray-900 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white" title="{{ $ticket->title }}" aria-haspopup="dialog">{{ $ticket->title }}</button>
                                 <p class="mt-1 max-w-sm truncate text-xs text-gray-500 dark:text-gray-400">{{ $ticket->description }}</p>
                             </td>
                             <td class="whitespace-nowrap px-6 py-4">
@@ -187,4 +189,5 @@
             {{ $tickets->onEachSide(1)->links('livewire.partials.ticket-pagination') }}
         </div>
     </div>
+    @include('livewire.partials.ticket-detail')
 </div>
