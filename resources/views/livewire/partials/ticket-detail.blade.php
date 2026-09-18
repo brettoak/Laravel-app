@@ -21,6 +21,37 @@
 
         <div class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
             @if ($selectedTicket)
+                <div class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</h3>
+                    <p class="mt-2 font-semibold text-gray-900 dark:text-white">{{ $statuses[$selectedTicket->status] ?? Str::headline($selectedTicket->status) }}</p>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Open → In progress → Resolved → Closed</p>
+
+                    @if ($selectedTicket->nextStatus())
+                        @can('transition', $selectedTicket)
+                            <button type="button" wire:click="transitionTicket('{{ $selectedTicket->nextStatus() }}')" wire:loading.attr="disabled" wire:target="transitionTicket" class="mt-4 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50">
+                                <span wire:loading.remove wire:target="transitionTicket">{{ match ($selectedTicket->nextStatus()) { 'in_progress' => 'Start processing', 'resolved' => 'Mark as resolved', 'closed' => 'Close ticket' } }}</span>
+                                <span wire:loading wire:target="transitionTicket">Updating…</span>
+                            </button>
+                        @else
+                            <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">Only the assignee or an administrator can change this status.</p>
+                        @endcan
+                    @else
+                        <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">This ticket is closed. No further transitions are available.</p>
+                    @endif
+
+                    @if ($selectedTicket->resolved_at)
+                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">Resolved: {{ $selectedTicket->resolved_at->format('M d, Y H:i T') }}</p>
+                    @endif
+                    @if ($selectedTicket->closed_at)
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Closed: {{ $selectedTicket->closed_at->format('M d, Y H:i T') }}</p>
+                    @endif
+                    @if ($statusMessage)
+                        <p role="status" class="mt-3 text-sm text-emerald-700 dark:text-emerald-300">{{ $statusMessage }}</p>
+                    @endif
+                    @error('ticketStatus')
+                        <p role="alert" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
                 <dl class="space-y-6">
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Title</dt>
