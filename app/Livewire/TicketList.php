@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Actions\Tickets\TransitionTicket;
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,16 +21,35 @@ class TicketList extends Component
 
     public bool $showTicketDetails = false;
 
+    #[Locked]
+    public ?string $statusMessage = null;
+
+    public function transitionTicket(string $targetStatus): void
+    {
+        abort_unless(auth()->check(), 403);
+        abort_unless($this->showTicketDetails && $this->selectedTicketId !== null, 404);
+        $this->resetValidation('ticketStatus');
+        $this->statusMessage = null;
+
+        app(TransitionTicket::class)->handle($this->selectedTicketId, $targetStatus, auth()->user());
+
+        $this->statusMessage = 'Status updated to '.Ticket::STATUSES[$targetStatus].'.';
+    }
+
     public function openTicket(int $ticketId): void
     {
         abort_unless(auth()->check(), 403);
 
+        $this->resetValidation('ticketStatus');
+        $this->statusMessage = null;
         $this->selectedTicketId = Ticket::query()->findOrFail($ticketId)->id;
         $this->showTicketDetails = true;
     }
 
     public function closeTicket(): void
     {
+        $this->resetValidation('ticketStatus');
+        $this->statusMessage = null;
         $this->selectedTicketId = null;
         $this->showTicketDetails = false;
     }

@@ -30,6 +30,16 @@ class Ticket extends Model
         'urgent' => 'Urgent',
     ];
 
+    public function nextStatus(): ?string
+    {
+        return match ($this->status) {
+            'open' => 'in_progress',
+            'in_progress' => 'resolved',
+            'resolved' => 'closed',
+            default => null,
+        };
+    }
+
     protected $fillable = [
         'ticket_number',
         'requester_id',
